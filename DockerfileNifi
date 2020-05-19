@@ -1,0 +1,26 @@
+FROM ubuntu:latest
+MAINTAINER jistol <pptwenty@gmail.com>
+
+# Arguments
+ARG NIFI_URL 
+ARG NIFI_PATH 
+ENV NIFI_PATH_ENV=$NIFI_PATH
+
+RUN mkdir -p $NIFI_PATH
+WORKDIR $NIFI_PATH
+
+# OS basic setup
+RUN apt-get update 
+RUN apt-get install -y vim wget procps
+RUN apt-get install -y default-jdk
+
+# Install NIFI and start
+RUN wget -O nifi.tar.gz -c $NIFI_URL -nv
+RUN tar -zxf nifi.tar.gz -C $NIFI_PATH/
+RUN mv $NIFI_PATH/nifi-*/* $NIFI_PATH/
+
+ADD entrypoint-nifi.sh $NIFI_PATH/entrypoint.sh
+RUN chmod 775 $NIFI_PATH/entrypoint.sh
+
+ENTRYPOINT $NIFI_PATH_ENV/entrypoint.sh $NIFI_PATH_ENV
+

@@ -1,0 +1,29 @@
+FROM ubuntu:latest
+MAINTAINER jistol <pptwenty@gmail.com>
+
+# Arguments
+ARG KAFKA_URL 
+ARG KAFKA_PATH 
+ENV KAFKA_PATH_ENV=$KAFKA_PATH
+
+RUN mkdir -p $KAFKA_PATH
+RUN mkdir -p $KAFKA_PATH/logs
+WORKDIR $KAFKA_PATH
+
+# OS basic setup
+RUN apt-get update 
+RUN apt-get install -y vim wget procps
+
+# Install java
+RUN apt-get install -y default-jdk
+
+# Install Kafka and start
+RUN wget -O kafka-download.tgz -nv -c $KAFKA_URL
+RUN tar -zxf ./kafka-download.tgz -C $KAFKA_PATH/
+RUN mv $KAFKA_PATH/kafka_*/* $KAFKA_PATH/
+
+ADD entrypoint-broker.sh $KAFKA_PATH/entrypoint.sh
+RUN chmod 775 $KAFKA_PATH/entrypoint.sh
+RUN ls $KAFKA_PATH
+
+ENTRYPOINT $KAFKA_PATH_ENV/entrypoint.sh $KAFKA_PATH_ENV
